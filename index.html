@@ -1727,41 +1727,71 @@ function setTF(tf) {
   if (KEY) loadAll();
 }
 
-/* ══ FETCH FINNHUB ════════════════════════════════════ */
+/* ══ FETCH FINNHUB (Principal US) ════════════════════════════════════ */
 const FH = 'https://finnhub.io/api/v1';
 
 async function fhQuote(sym) {
-  // 1. CORTOCIRCUITO: Si es BMV, lanzamos error local sin tocar la red. Evita el 403.
-  if (sym.startsWith('BMV:')) throw new Error('BMV no soportado en free tier');
-  
   const r = await fetch(`${FH}/quote?symbol=${encodeURIComponent(sym)}&token=${KEY}`);
-  
-  // 2. Manejo explícito del 403 por si la API Key es inválida
-  if (r.status === 403) throw new Error('403 Prohibido - Verifica tu API Key');
   if (!r.ok) throw new Error(`quote HTTP ${r.status}`);
-  
   const d = await r.json();
   if (d.error) throw new Error(d.error);
   return d;
 }
 
 async function fhCandle(sym, res) {
-  // 1. CORTOCIRCUITO BMV
-  if (sym.startsWith('BMV:')) throw new Error('BMV no soportado en free tier');
-
   const to = Math.floor(Date.now() / 1000);
-  const days = res === 'D' ? 420 : 750;
+  const days = 360; // Máximo 360 días para evitar el error 403 Premium
   const from = to - days * 86400;
   
   const r = await fetch(`${FH}/stock/candle?symbol=${encodeURIComponent(sym)}&resolution=${res}&from=${from}&to=${to}&token=${KEY}`);
-  
-  if (r.status === 403) throw new Error('403 Prohibido - Verifica tu API Key');
   if (!r.ok) throw new Error(`candle HTTP ${r.status}`);
   
   const d = await r.json();
   if (d.s !== 'ok') throw new Error(`s=${d.s}`);
   if (!d.c || d.c.length < 20) throw new Error('datos insuficientes');
   return d.c;
+}
+
+/* ══ FETCH YAHOO FINANCE (BMV y Fallback) ════════════════════════════ */
+async function fetchYahoo(sym) {
+  let ySym = sym;
+  if (sym.startsWith('BMV:')) {
+    ySym = sym.replace('BMV:', '') + '.MX';
+  }
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${ySym}?range=1y&interval=1d`;
+  const proxy = `https://corsproxy.io/?${encodeURIComponent(url)}`;
+  
+  const r = await fetch(proxy);
+  if (!r.ok) throw new Error(`Yahoo HTTP ${r.status}`);
+  const d = await r.json();
+  
+  if (!d.chart || !d.chart.result || !d.chart.result[0]) throw new Error('Ticker no encontrado en Yahoo');
+  
+  const res = d.chart.result[0];
+  const price = res.meta.regularMarketPrice;
+  const prevClose = res.meta.chartPreviousClose;
+  const dp = prevClose ? ((price - prevClose) / prevClose) * 100 : 0;
+  const closes = res.indicators.quote[0].close.filter(c => c !== null);
+  
+  return { quote: { c: price, dp: dp }, closes: closes };
+}
+
+/* ══ RUTEO INTELIGENTE DE DATOS ══════════════════════════════════════ */
+async function getTickerData(tk) {
+  // 1. Si es BMV, vamos directo a Yahoo para no desperdiciar peticiones de Finnhub
+  if (tk.f.startsWith('BMV:')) {
+    return await fetchYahoo(tk.f);
+  }
+  
+  // 2. Si es US (SIC), intentamos Finnhub primero
+  try {
+    const [q, c] = await Promise.all([fhQuote(tk.f), fhCandle(tk.f, TF)]);
+    return { quote: q, closes: c };
+  } catch (fhError) {
+    console.warn(`⚠️ Finnhub falló para ${tk.s} (${fhError.message}). Entrando al rescate con Yahoo...`);
+    // 3. Fallback: Si Finnhub falla, Yahoo Finance toma el relevo automáticamente
+    return await fetchYahoo(tk.f);
+  }
 }
 
 /* ══ INDICADORES ══════════════════════════════════════ */
@@ -1934,15 +1964,16 @@ async function loadAll() {
 
   for(let i=0;i<ALL.length;i+=3){
     const batch=ALL.slice(i,i+3);
-    await Promise.all(batch.map(async tk=>{
+   await Promise.all(batch.map(async tk=>{
       try{
-        const [q,c]=await Promise.all([fhQuote(tk.f),fhCandle(tk.f,TF)]);
-        renderCard(tk,q,c,null);
+        // El ruteador decide qué API usar
+        const data = await getTickerData(tk);
+        // Renderizamos la tarjeta sin importar de dónde vinieron los datos
+        renderCard(tk, data.quote, data.closes, null);
       }catch(e){
-        const msg=e.message||'';
-        renderCard(tk,null,null,msg);
-        if(tk.f.startsWith('BMV:'))bmvFails.push(tk.s);
-        else errList.push(`${tk.s}: ${msg}`);
+        const msg = e.message || '';
+        renderCard(tk, null, null, msg);
+        errList.push(`${tk.s}: ${msg}`);
         errs++;
       }
       loaded++;
