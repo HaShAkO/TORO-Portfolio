@@ -1088,24 +1088,36 @@ function setMC(id,txt,cls){const e=document.getElementById(id);if(e){e.textConte
 // PORTFOLIO DATA (Actualizado con tu último Excel de hoy)
 // ══════════════════════════════════════════════════════
 const DEFAULT_PF = [
-  {sym:'AMZN', shares:1, mktPx:4138.05, mktVal:4138.05, costVal:3539.00, market:'SIC', sector:'Tecnología', cap:'Mega'},
-  {sym:'COPX', shares:2, mktPx:1467.00, mktVal:2934.00, costVal:2702.00, market:'SIC', sector:'Materiales', cap:'ETF'},
-  {sym:'GOOGL', shares:3, mktPx:5547.60, mktVal:16642.80, costVal:16029.99, market:'SIC', sector:'Tecnología', cap:'Mega'},
-  {sym:'IAU', shares:20, mktPx:1544.99, mktVal:30899.80, costVal:31674.20, market:'SIC', sector:'Metales', cap:'ETF'},
-  {sym:'ITA', shares:1, mktPx:3973.52, mktVal:3973.52, costVal:3940.00, market:'SIC', sector:'Defensa', cap:'ETF'},
-  {sym:'PLTR', shares:10, mktPx:2287.47, mktVal:22874.70, costVal:26911.80, market:'SIC', sector:'Tecnología', cap:'Mid'},
-  {sym:'SNDK1', shares:2, mktPx:16440.00, mktVal:32880.00, costVal:21000.00, market:'SIC', sector:'Tecnología', cap:'Large'},
-  {sym:'SOXX', shares:5, mktPx:6777.65, mktVal:33888.25, costVal:29709.00, market:'SIC', sector:'ETF', cap:'ETF'},
-  {sym:'URA', shares:3, mktPx:900.00, mktVal:2700.00, costVal:2535.00, market:'SIC', sector:'Energía', cap:'ETF'},
-  {sym:'WDC', shares:1, mktPx:6090.90, mktVal:6090.90, costVal:4550.00, market:'SIC', sector:'Tecnología', cap:'Large'},
-  {sym:'FMTY14', shares:1400, mktPx:15.79, mktVal:22106.00, costVal:20398.00, market:'BMV', sector:'Bienes Raíces', cap:'Mid'},
-  {sym:'FNOVA17', shares:150, mktPx:38.40, mktVal:5760.00, costVal:5784.00, market:'BMV', sector:'Bienes Raíces', cap:'Mid'},
-  {sym:'GAPB', shares:18, mktPx:278.43, mktVal:5011.74, costVal:5942.16, market:'BMV', sector:'Industriales', cap:'Large'},
-  {sym:'GMEXICOB', shares:65, mktPx:186.29, mktVal:12108.85, costVal:12507.30, market:'BMV', sector:'Minería', cap:'Large'},
-  {sym:'IVVPESO', shares:120, mktPx:100.99, mktVal:12118.80, costVal:12271.20, market:'BMV', sector:'ETF', cap:'ETF'},
-  {sym:'NAFTRAC', shares:178, mktPx:66.19, mktVal:11781.82, costVal:12052.38, market:'BMV', sector:'ETF', cap:'ETF'},
-  {sym:'VMEX19', shares:100, mktPx:54.91, mktVal:5491.00, costVal:5890.00, market:'BMV', sector:'Bienes Raíces', cap:'Mid'},
-  {sym:'CASH', shares:1, mktPx:1228.43, mktVal:1228.43, costVal:1228.43, market:'CASH', sector:'Efectivo', cap:'Cash'}
+  {sym:'AMZN', shares:1, mktPx:4138.05, mktVal:4138.05, costVal:3539.00, chgDay:0, alloc:0, market:'SIC', sector:'Tecnología', cap:'Mega'},
+  {sym:'COPX', shares:2, mktPx:1467.00, mktVal:2934.00, costVal:2702.00, chgDay:0, alloc:0, market:'SIC', sector:'Materiales', cap:'ETF'},
+  {sym:'GOOGL', shares:3, mktPx:5547.60, mktVal:16642.80, costVal:16029.99, chgDay:0, alloc:0, market:'SIC', sector:'Tecnología', cap:'Mega'},
+  {sym:'IAU', shares:20, mktPx:1544.99, mktVal:30899.80, costVal:31674.20, chgDay:0, alloc:0, market:'SIC', sector:'Metales', cap:'ETF'},
+  {sym:'ITA', shares:1, mktPx:3973.52, mktVal:3973.52, costVal:3940.00, chgDay:0, alloc:0, market:'SIC', sector:'Defensa', cap:'ETF'},
+  {sym:'PLTR', shares:10, mktPx:2287.47, mktVal:22874.70, costVal:26911.80, chgDay:0, alloc:0, market:'SIC', sector:'Tecnología', cap:'Mid'},
+  {sym:'SNDK1', shares:2, mktPx:16440.00, mktVal:32880.00, costVal:21000.00, chgDay:0, alloc:0, market:'SIC', sector:'Tecnología', cap:'Large'},
+  {sym:'SOXX', shares:5, mktPx:6777.65, mktVal:33888.25, costVal:29709.00, chgDay:0, alloc:0, market:'SIC', sector:'ETF', cap:'ETF'},
+  {sym:'URA', shares:3, mktPx:900.00, mktVal:2700.00, costVal:2535.00, chgDay:0, alloc:0, market:'SIC', sector:'Energía', cap:'ETF'},
+  {sym:'WDC', shares:1, mktPx:6090.90, mktVal:6090.90, costVal:4550.00, chgDay:0, alloc:0, market:'SIC', sector:'Tecnología', cap:'Large'},
+  {sym:'FMTY14', shares:1400, mktPx:15.79, mktVal:22106.00, costVal:20398.00, chgDay:0, alloc:0, market:'BMV', sector:'Bienes Raíces', cap:'Mid'},
+  {sym:'FNOVA17', shares:150, mktPx:38.40, mktVal:5760.00, costVal:5784.00, chgDay:0, alloc:0, market:'BMV', sector:'Bienes Raíces', cap:'Mid'},
+  {sym:'GAPB', shares:18, mktPx:278.43, mktVal:5011.74, costVal:5942.16, chgDay:0, alloc:0, market:'BMV', sector:'Industriales', cap:'Large'},
+  {sym:'GMEXICOB', shares:65, mktPx:186.29, mktVal:12108.85, costVal:12507.30, chgDay:0, alloc:0, market:'BMV', sector:'Minería', cap:'Large'},
+  {sym:'IVVPESO', shares:120, mktPx:100.99, mktVal:12118.80, costVal:12271.20, chgDay:0, alloc:0, market:'BMV', sector:'ETF', cap:'ETF'},
+  {sym:'NAFTRAC', shares:178, mktPx:66.19, mktVal:11781.82, costVal:12052.38, chgDay:0, alloc:0, market:'BMV', sector:'ETF', cap:'ETF'},
+  {sym:'VMEX19', shares:100, mktPx:54.91, mktVal:5491.00, costVal:5890.00, chgDay:0, alloc:0, market:'BMV', sector:'Bienes Raíces', cap:'Mid'},
+  {sym:'CASH', shares:1, mktPx:1228.43, mktVal:1228.43, costVal:1228.43, chgDay:0, alloc:0, market:'CASH', sector:'Efectivo', cap:'Cash'}
+];
+
+const FONDEOS = [
+  {date:'2026-02-03', amount:50000,   note:'Fondeo 1'},
+  {date:'2026-02-04', amount:50000,   note:'Fondeo 2'},
+  {date:'2026-02-16', amount:3746.70, note:'Fondeo 3'},
+  {date:'2026-02-17', amount:9000,    note:'Fondeo 4'},
+  {date:'2026-02-18', amount:7500,    note:'Fondeo 5'},
+  {date:'2026-02-19', amount:3300,    note:'Fondeo 6'},
+  {date:'2026-03-17', amount:50000,   note:'Fondeo 7'},
+  {date:'2026-03-17', amount:26000,   note:'Fondeo 8'},
+  {date:'2026-04-07', amount:22949.39,note:'Fondeo 9'},
 ];
 
 const FONDEOS = [
